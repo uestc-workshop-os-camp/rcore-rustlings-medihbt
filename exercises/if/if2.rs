@@ -11,9 +11,18 @@ pub fn foo_if_fizz(fizzish: &str) -> &str {
     if fizzish == "fizz" {
         "foo"
     } else {
-        1
+        "baz"
     }
 }
+
+pub fn foo_if_fuzz(fuzzish: &str) -> &str {
+    if fuzzish == "fuzz" {
+        "bar"
+    } else {
+        "1"
+    }
+}
+
 
 // No test changes needed!
 #[cfg(test)]
@@ -27,7 +36,7 @@ mod tests {
 
     #[test]
     fn bar_for_fuzz() {
-        assert_eq!(foo_if_fizz("fuzz"), "bar")
+        assert_eq!(foo_if_fuzz("fuzz"), "bar")
     }
 
     #[test]
