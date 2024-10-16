@@ -40,10 +40,44 @@ impl Default for Person {
 // If while parsing the age, something goes wrong, then return the default of
 // Person Otherwise, then return an instantiated Person object with the results
 
-// I AM NOT DONE
-
 impl From<&str> for Person {
     fn from(s: &str) -> Person {
+        if s.len() == 0 {
+            return Person::default();
+        }
+        let mut sit = s.split(",");
+        let mut pname: &str = "";
+        let mut psage: &str = "";
+        let mut page: usize = 0;
+        if let Some(name) = sit.next() {
+            if name.len() == 0 {
+                return Person::default();
+            }
+            pname = name;
+        } else {
+            return Person::default();
+        }
+
+        if let Some(age) = sit.next() {
+            psage = age;
+        } else {
+            return Person::default();
+        }
+
+        if let Ok(age) = psage.parse::<usize>() {
+            page = age;
+        } else {
+            return Person::default();
+        }
+        
+        if let Some(pothers) = sit.next() {
+            return Person::default();
+        } else {
+            return Person {
+                name: pname.into(),
+                age:  page
+            };
+        }
     }
 }
 

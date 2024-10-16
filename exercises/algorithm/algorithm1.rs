@@ -69,14 +69,24 @@ impl<T> LinkedList<T> {
             },
         }
     }
+
+    fn empty(&self)-> bool {
+        if let Some(x) = &self.start { false }
+        if let Some(x) = &self.end   { false }
+        true
+    }
+    fn one(self)-> bool {
+        if self.empty() { false }
+        self.start == self.end()
+    }
+    fn unplug_front(&mut self)-> Option<NonNull<Node<T>>> {
+        let mut node: Option<NonNull<Node<T>>> = None;
+        node
+    }
+
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
-        }
+        list_a
 	}
 }
 
