@@ -3,13 +3,12 @@
 	This question requires you to use a stack to achieve a bracket match
 */
 
-// I AM NOT DONE
 #[derive(Debug)]
 struct Stack<T> {
 	size: usize,
 	data: Vec<T>,
 }
-impl<T> Stack<T> {
+impl<T: Clone> Stack<T> {
 	fn new() -> Self {
 		Self {
 			size: 0,
@@ -31,8 +30,11 @@ impl<T> Stack<T> {
 		self.size += 1;
 	}
 	fn pop(&mut self) -> Option<T> {
-		// TODO
-		None
+		if self.size == 0 {
+			return None;
+		}
+		self.size -= 1;
+		self.data.pop()
 	}
 	fn peek(&self) -> Option<&T> {
 		if 0 == self.size {
@@ -99,10 +101,36 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 	}
 }
 
+fn get_match_bracket(c: char) -> char {
+	match c {
+		')' => '(', '}' => '{', ']' => '[',
+		_   => c,
+	}
+}
+
 fn bracket_match(bracket: &str) -> bool
 {
-	//TODO
-	true
+	let mut stk = Stack::<char>::new();
+	for c in bracket.chars() {
+		match c {
+			'{' | '[' | '(' => stk.push(c),
+			'}' | ']' | ')' => {
+				let mc = if let Some(ch) = stk.pop() { ch } else {
+					println!("stack empty at {}", c);
+					return false;
+				};
+				if mc != get_match_bracket(c) {
+					println!("no pair at {} (got `{}`)", c, mc);
+					return false;
+				}
+			},
+			_ => {}
+		}
+	}
+	if (!stk.is_empty()) {
+		println!("stack has {} elems", stk.len());
+	}
+	stk.is_empty()
 }
 
 #[cfg(test)]

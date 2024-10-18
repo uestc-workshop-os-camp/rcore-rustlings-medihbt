@@ -2,10 +2,8 @@
 	double linked list reverse
 	This problem requires you to reverse a doubly linked list
 */
-// I AM NOT DONE
-
 use std::fmt::{self, Display, Formatter};
-use std::ptr::NonNull;
+use std::ptr::{null_mut, NonNull};
 use std::vec::*;
 
 #[derive(Debug)]
@@ -72,8 +70,59 @@ impl<T> LinkedList<T> {
             },
         }
     }
+    fn empty_or_only(&self) -> bool {
+        self.start == self.end
+    }
+    unsafe fn unplug_node_next(&mut self, node: NonNull<Node<T>>) -> Option<NonNull<Node<T>>> {
+        let pnode = node.as_ptr();
+        let next = match ((*pnode).next) {
+            Some(x) => x,
+            None => return None,
+        };
+        let pnext = next.as_ptr();
+        let next2 = (*pnext).next;
+
+        if let Some(pnext2) = next2 {
+            (*pnode).next = next2;
+            (*pnext2.as_ptr()).prev = Some(node);
+        } else {
+            self.end = Some(node);
+            (*pnode).next = None;
+        }
+        self.length -= 1;
+
+        (*pnext).prev = None;
+        (*pnext).next = None;
+        Some(next)
+    }
+    fn prepend_node(&mut self, node: NonNull<Node<T>>) {
+        if self.start.is_none() {
+            self.start = Some(node);
+            self.end   = Some(node);
+            self.length = 1;
+            return;
+        }
+        let start = if let Some(x) = self.start { x } else { unreachable!() };
+        unsafe {
+            (*start.as_ptr()).prev = Some(node);
+            (*node.as_ptr()).next  = self.start;
+            self.start = Some(node);
+            self.length += 1;
+        }
+    }
 	pub fn reverse(&mut self){
-		// TODO
+		if self.start == self.end {
+            return;
+        }
+        let curr = match self.start {
+            Some(x) => x,
+            _ => unreachable!()
+        };
+        unsafe {
+            while let Some(node) = self.unplug_node_next(curr) {
+                self.prepend_node(node);
+            }
+        }
 	}
 }
 

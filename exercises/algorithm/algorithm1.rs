@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -29,13 +28,17 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T> Default for LinkedList<T>
+where
+    T: PartialOrd {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T> LinkedList<T>
+where
+    T: PartialOrd {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -70,23 +73,76 @@ impl<T> LinkedList<T> {
         }
     }
 
-    fn empty(&self)-> bool {
-        if let Some(x) = &self.start { false }
-        if let Some(x) = &self.end   { false }
-        true
-    }
-    fn one(self)-> bool {
-        if self.empty() { false }
-        self.start == self.end()
-    }
     fn unplug_front(&mut self)-> Option<NonNull<Node<T>>> {
-        let mut node: Option<NonNull<Node<T>>> = None;
-        node
+        if self.start == self.end {
+            match self.end {
+                Some(x) => {
+                    self.start = None;
+                    self.end   = None;
+                    return Some(x)
+                },
+                None => return None
+            }
+        } else if let Some(x) = self.start {
+            unsafe {
+                let next = (*x.as_ptr()).next;
+                self.start = next;
+            }
+            return Some(x);
+        } else {
+            return None;
+        }
+    }
+    fn append_node(&mut self, node: Option<NonNull<Node<T>>>) {
+        if let Some(x) = self.end {
+            unsafe {
+                (*x.as_ptr()).next = node;
+                self.end = node;
+            }
+        } else {
+            self.start = node;
+            self.end   = node;
+        }
+        self.length += 1;
     }
 
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-        list_a
+        let mut ra = list_a;
+        let mut rb = list_b;
+        let mut ret = Self::new();
+
+        let mut ait = ra.unplug_front();
+        let mut bit = rb.unplug_front();
+        loop {
+            let anull = if let None = ait { true } else { false };
+            let bnull = if let None = bit { true } else { false };
+            if anull && bnull {
+                break;
+            }
+            if anull {
+                ret.append_node(bit);
+                bit = rb.unplug_front();
+                break;
+            }
+            if bnull {
+                ret.append_node(ait);
+                ait = ra.unplug_front();
+                break;
+            }
+            let aval = if let Some(x) = &ait { unsafe { &(*x.as_ptr()).val } } else { unreachable!(); };
+            let bval = if let Some(x) = &bit { unsafe { &(*x.as_ptr()).val } } else { unreachable!(); };
+            if aval < bval {
+                let to_add = ait;
+                ait = ra.unplug_front();
+                ret.append_node(to_add);
+            } else {
+                let to_add = bit;
+                bit = rb.unplug_front();
+                ret.append_node(to_add);
+            }
+        }
+        ret
 	}
 }
 

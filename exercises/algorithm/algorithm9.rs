@@ -2,8 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
-
 use std::cmp::Ord;
 use std::default::Default;
 
@@ -37,7 +35,28 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        /* shift up */
+        let mut selfidx = self.count;
+        loop {
+            if selfidx == 1 {
+                return;
+            }
+            let parentidx = selfidx / 2;
+            let childref = &self.items[selfidx];
+            let parentref = &self.items[parentidx];
+            if self.less(childref, parentref) {
+                self.items.swap(selfidx, parentidx);
+                selfidx = parentidx;
+            } else {
+                return;
+            }
+        }
+    }
+
+    fn less(&self, a: &T, b: &T)-> bool {
+        (self.comparator)(a, b)
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +76,15 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let leftidx  = idx * 2;
+        let rightidx = leftidx + 1;
+        if leftidx >= self.len() {
+            return idx;
+        }
+        if rightidx >= self.len() {
+            return leftidx;
+        }
+        if (self.comparator)(&self.items[leftidx], &self.items[rightidx]) { leftidx } else { rightidx }
     }
 }
 
@@ -84,8 +110,34 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+        let items = &mut self.items;
+
+        /* Swap out root */
+        items.swap(1, self.count);
+        let ret = items.pop();
+        self.count -= 1;
+        if self.is_empty() {
+            return ret;
+        }
+
+        /* Shift Down */
+        let mut curr = 1usize;
+        loop {
+            let minchild = self.smallest_child_idx(curr);
+            if minchild == curr {
+                break;
+            }
+            if self.less(&self.items[curr], &self.items[minchild]) {
+                break;
+            }
+            self.items.swap(curr, minchild);
+            curr = minchild;
+        }
+        
+        return ret;
     }
 }
 
